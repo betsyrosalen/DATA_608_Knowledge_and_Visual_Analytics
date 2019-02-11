@@ -83,7 +83,7 @@ NY <- NY[complete.cases(NY), ]
 
 ggplot(NY, aes(x=Industry, y=Employees)) + 
     #geom_violin(adjust=.5, coef = 0) +
-    geom_boxplot(width=.5, fill="darkgray", outlier.colour=NA) +
+    geom_boxplot(width=.5, fill="#58BFFF", outlier.colour=NA) +
     stat_summary(aes(colour = "mean"), fun.y = mean, geom="point", fill="red", 
                  colour="red", shape=21, size=2, show.legend=TRUE) +
     stat_summary(aes(colour = "median"), fun.y = median, geom="point", fill="blue", 
@@ -102,10 +102,20 @@ ggplot(NY, aes(x=Industry, y=Employees)) +
 
 Now imagine you work for an investor and want to see which industries generate the most revenue per employee. Create a chart that makes this information clear. Once again, the distribution per industry should be shown.
 
-```{r}
+```{r fig.width=6, fig.height=6}
+library(dplyr)
+revenue <-inc[complete.cases(inc),] %>%
+                      group_by(Industry) %>%
+                      summarise(sumR=sum(Revenue),sumE=sum(Employees)) %>%
+                      mutate(rev_per_emp = sumR/sumE) 
 
-# Answer Question 3 here
-
+ggplot(revenue, aes(x=reorder(Industry, -rev_per_emp),y=rev_per_emp)) + 
+    geom_bar(fill = "#58BFFF", stat="identity") +
+    coord_flip() + 
+    xlab("Industry") +
+    ylab("Revenue Per Employee") +
+    ggtitle("Revenue Per Employee") +
+    theme(panel.background = element_blank(), legend.position = "top")
 ```
 
 
