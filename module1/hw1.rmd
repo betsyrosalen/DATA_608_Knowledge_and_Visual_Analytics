@@ -1,0 +1,111 @@
+---
+title: "R Notebook"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
+options(scipen=999, digits = 3)
+```
+
+**Principles of Data Visualization and Introduction to ggplot2**
+
+I have provided you with data about the 5,000 fastest growing companies in the US, as compiled by Inc. magazine. lets read this in:
+
+```{r}
+inc <- read.csv("https://raw.githubusercontent.com/charleyferrari/CUNY_DATA_608/master/module1/Data/inc5000_data.csv", header= TRUE)
+```
+
+And lets preview this data:
+
+```{r}
+head(inc)
+```
+```{r}
+summary(inc)
+```
+
+Think a bit on what these summaries mean. Use the space below to add some more relevant non-visual exploratory information you think helps you understand this data:
+
+```{r}
+library(psych)
+describe(inc$Growth_Rate)
+describe(inc$Revenue)
+prop.table(table(inc$Industry))
+describe(inc$Employees)
+prop.table(table(inc$State))
+
+```
+
+## Question 1
+
+Create a graph that shows the distribution of companies in the dataset by State (ie how many are in each state). There are a lot of States, so consider which axis you should use. This visualization is ultimately going to be consumed on a 'portrait' oriented screen (ie taller than wide), which should further guide your layout choices.
+
+```{r fig.width=6, fig.height=8, include=FALSE}
+# option 1 using code found here...
+# https://stackoverflow.com/questions/5208679/order-bars-in-ggplot2-bar-graph
+library(ggplot2)
+ggplot(inc, aes(x=reorder(State,State,
+                     function(x)-length(x)))) + 
+    geom_bar(fill = "#5086E8", stat="count") +
+    coord_flip() +
+    geom_text(aes(label=..count..), stat="count", size=3, 
+              hjust=-0.2, color="darkgray") +
+    xlab("State Abbreviation") +
+    ylab("Number of Companies in State") +
+    ggtitle("5,000 Fastest Growing Companies in US") + 
+    theme(panel.background = element_blank())
+```
+
+```{r fig.width=6, fig.height=8}
+# option 2 using forcats library
+library(forcats)
+ggplot(inc, aes(x=fct_infreq(State))) + 
+    geom_bar(fill = "#58BFFF", stat="count") +
+    coord_flip() +
+    geom_text(aes(label=..count..), stat="count", size=3, 
+              hjust=-0.2, color="darkgray") +
+    xlab("State Abbreviation") +
+    ylab("Number of Companies in State") +
+    ggtitle("5,000 Fastest Growing Companies in US") + 
+    theme(panel.background = element_blank())
+```
+
+## Quesiton 2
+
+Lets dig in on the state with the 3rd most companies in the data set. Imagine you work for the state and are interested in how many people are employed by companies in different industries. Create a plot that shows the average and/or median employment by industry for companies in this state (only use cases with full data, use R's `complete.cases()` function.) In addition to this, your graph should show how variable the ranges are, and you should deal with outliers.
+
+```{r fig.width=10, fig.height=10}
+NY <- subset(inc, State=="NY")
+NY <- NY[complete.cases(NY), ]
+
+ggplot(NY, aes(x=Industry, y=Employees)) + 
+    #geom_violin(adjust=.5, coef = 0) +
+    geom_boxplot(width=.5, fill="darkgray", outlier.colour=NA) +
+    stat_summary(aes(colour = "mean"), fun.y = mean, geom="point", fill="red", 
+                 colour="red", shape=21, size=2, show.legend=TRUE) +
+    stat_summary(aes(colour = "median"), fun.y = median, geom="point", fill="blue", 
+                 colour="blue", shape=21, size=2, show.legend=TRUE) +
+    # I can't for the life of me figure out how to get a legend to show what the colored points represent  :-(
+    coord_flip(ylim = c(0, 1500), expand = TRUE) +   
+    scale_y_continuous(labels = scales::comma,
+                       breaks = seq(0, 1500, by = 150)) +
+    xlab("Industry") +
+    ylab("") +
+    ggtitle("Mean and Median Employment by Industry for 311 Fastest Growing Companies in NY") + 
+    theme(panel.background = element_blank(), legend.position = "top")
+```
+
+## Question 3
+
+Now imagine you work for an investor and want to see which industries generate the most revenue per employee. Create a chart that makes this information clear. Once again, the distribution per industry should be shown.
+
+```{r}
+
+# Answer Question 3 here
+
+```
+
+
