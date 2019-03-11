@@ -32,24 +32,22 @@ ui <- fluidPage(
 server <- function(input, output, session) {
 
     nationalData <- reactive({
-        df %>%
+        national <- df %>%
             filter(ICD.Chapter == input$Cause) %>%
             group_by(Year) %>%
-            summarize(Rate = (sum(Deaths) / sum(Population)) * 1000000) %>%
+            summarize(Crude.Rate = round((sum(Deaths) / sum(Population)) * 100000, 2)) %>%
             mutate(State = "National") %>%
             arrange(Year)
     })
 
     stateData <- reactive({
-        df %>%
-            filter(ICD.Chapter == input$Cause & State == input$State) %>%
-            group_by(Year, State) %>%
-            mutate(Rate = (Deaths / Population) * 1000000) %>%
-            select(Year, Rate, as.character(State)) %>%
-            tbl_df()
+        state <- df %>%
+            filter(ICD.Chapter == input$Cause & State %in% input$State) %>%
+            select(Year, State, Crude.Rate)
     })
 
     combinedData <- reactive({
+        #DATA <- rbind(national, state)
         merge(nationalData(), stateData(), all.x=TRUE)
     })
 

@@ -17,11 +17,24 @@ library(shiny)
 URL <- 'https://raw.githubusercontent.com/charleyferrari/CUNY_DATA608/master/lecture3/data/cleaned-cdc-mortality-1999-2010-2.csv'
 df <- read.csv(URL)
 
+national <- df %>%
+    group_by(ICD.Chapter, Year) %>%
+    summarize(Crude.Rate = round((sum(Deaths) / sum(Population)) * 100000, 2)) %>%
+    mutate(State = "National") %>%
+    arrange(Year) %>%
+    tbl_df()
+
+state <- df %>%
+    select(ICD.Chapter, Year, State, Crude.Rate)%>%
+    tbl_df()
+
+DATA <- rbind(national, state)
+
 ui <- fluidPage(
     headerPanel('State Mortality Rates Explorer'),
     sidebarPanel(
-        selectInput('Cause', 'Cause of Death', unique(df$ICD.Chapter), selected='Certain infectious and parasitic diseases'),
-        selectInput('State', 'State', unique(df$State), selected='NY', multiple = TRUE)
+        selectInput('Cause', 'Cause of Death', unique(DATA$ICD.Chapter), selected='Certain infectious and parasitic diseases'),
+        selectInput('State', 'State', unique(DATA$State), selected='NY', multiple = TRUE)
     ),
     mainPanel(
         plotlyOutput('plot1'),
@@ -40,13 +53,14 @@ server <- function(input, output, session) {
             mutate(State = "National") %>%
             arrange(Year)
 
-        state <- df %>%
+        state <- DATA %>%
             filter(ICD.Chapter == input$Cause & State %in% input$State) %>%
             select(Year, State, Crude.Rate)
 
         DATA <- rbind(national, state)
 
     })
+
 
     output$plot1 <- renderPlotly({
         #req(input$Cause)
@@ -55,7 +69,7 @@ server <- function(input, output, session) {
         #dfSlice <- df %>%
             #filter(ICD.Chapter == input$Cause, State == input$State)
 
-        plot_ly(selectedData()$DATA, x = ~Year, y = ~Crude.Rate, color = ~State, type='scatter',
+        plot_ly(combinedData(), x = ~Year, y = ~Rate, color = ~State, type='scatter',
                 mode = 'lines')
 
     })
