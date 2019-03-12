@@ -35,12 +35,15 @@ ui <- fluidPage(
         selectizeInput('State', 'State', unique(df$State), selected='NY', options = list(maxItems = 5))
     ),
     mainPanel(
-        plotlyOutput('plot1'),
-        verbatimTextOutput('stats')
+        plotlyOutput('plot1')
     )
 )
 
-server <- function(input, output, session) {
+server <- function(input, output) {
+
+    output$Title <- renderText({
+        paste('<b>Death rate for: </b>', input$Cause)
+    })
 
     nationalData <- reactive({
         national %>%
@@ -59,7 +62,11 @@ server <- function(input, output, session) {
     output$plot1 <- renderPlotly({
 
         plot_ly(combined(), x = ~Year, y = ~Crude.Rate, color = ~State, type='scatter',
-                mode = 'lines')
+                mode = 'lines') %>%
+            layout(title = paste('<b>Death rate for: </b>', input$Cause),
+                   xaxis = list(title = ""),
+                   yaxis = list(side = 'left', title = 'Number of deaths per 100,000 people',
+                                showgrid = FALSE, zeroline = FALSE))
     })
 
 }
