@@ -21,27 +21,22 @@ ui <- fluidPage(
     sidebarPanel(
         selectInput('Cause', 'Cause of Death', unique(df$ICD.Chapter), selected='Certain infectious and parasitic diseases'),
         #selectInput('State', 'State', unique(df$State), selected='NY', multiple = TRUE)
-        selectizeInput('State', 'State', unique(df$State), selected='NY', options = list(maxItems = 5))
+        selectizeInput('State', 'Select up to 5 states to compare with the national average', unique(df$State), selected='NY', options = list(maxItems = 5))
     ),
     mainPanel(
-        htmlOutput(outputId = 'selection_summary'),
+        htmlOutput(outputId = 'selection'),
         plotOutput('plot1'),
         h6("Number of deaths per 100,000 people")
-
-        #verbatimTextOutput('stats')
     )
 )
 
 server <- function(input, output) {
 
-    output$selection_summary <- renderText({
-
+    output$selection <- renderText({
         paste('<b>Death rate for: </b>', input$Cause)
-
     })
 
     output$plot1 <- renderPlot({
-
         national <- df %>%
             filter(ICD.Chapter == input$Cause) %>%
             group_by(Year) %>%
@@ -64,13 +59,6 @@ server <- function(input, output) {
             scale_color_brewer(palette="Paired") +
             theme_minimal()
     })
-
-    #output$stats <- renderPrint({
-    #dfSlice <- df %>%
-    #filter(Seasonality == input$seas, Metro == input$metro, Tier == input$tier)
-
-    #summary(dfSlice$HPI)
-    #})
 
 }
 

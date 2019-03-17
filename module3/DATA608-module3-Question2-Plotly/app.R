@@ -31,11 +31,15 @@ state <- df %>%
 ui <- fluidPage(
     headerPanel('State Mortality Rates Explorer'),
     sidebarPanel(
-        selectInput('Cause', 'Cause of Death', unique(state$ICD.Chapter), selected='Certain infectious and parasitic diseases'),
-        selectizeInput('State', 'State', unique(df$State), selected='NY', options = list(maxItems = 5))
+        selectInput('Cause', 'Cause of Death', unique(state$ICD.Chapter),
+                    selected='Certain infectious and parasitic diseases'),
+        selectizeInput('State', 'Select up to 5 states to compare with the national average',
+                       unique(df$State), selected='NY', options = list(maxItems = 5))
     ),
     mainPanel(
-        plotlyOutput('plot1')
+        htmlOutput(outputId = 'Title'),
+        plotlyOutput('plot1'),
+        h6("Number of deaths per 100,000 people")
     )
 )
 
@@ -62,11 +66,11 @@ server <- function(input, output) {
     output$plot1 <- renderPlotly({
 
         plot_ly(combined(), x = ~Year, y = ~Crude.Rate, color = ~State, type='scatter',
-                mode = 'lines') %>%
-            layout(title = paste('<b>Death rate for: </b>', input$Cause),
-                   xaxis = list(title = ""),
-                   yaxis = list(side = 'left', title = 'Number of deaths per 100,000 people',
-                                showgrid = FALSE, zeroline = FALSE))
+                mode = 'lines', line = list(width = 4)) %>%
+            layout(xaxis = list(title = ""),
+                   yaxis = list(side = 'left',
+                                showgrid = FALSE,
+                                zeroline = FALSE))
     })
 
 }
