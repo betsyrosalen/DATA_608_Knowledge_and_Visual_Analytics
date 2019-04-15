@@ -15,3 +15,6 @@ module3/Ignore
 module4/Ignore
 module4/.ipynb_checkpoints
 module4/*.html
+
+Final_Project/data
+Final_Project/Ignore
