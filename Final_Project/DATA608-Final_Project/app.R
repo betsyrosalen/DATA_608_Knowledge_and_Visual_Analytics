@@ -28,32 +28,34 @@
 # https://github.com/betsyrosalen/DATA_608_Knowledge_and_Visual_Analytics/tree/master/Final_Project/data
 # 
 
-
-
 library(ggplot2)
 library(dplyr)
 library(shiny)
 
-ActivityURL <- 'https://raw.githubusercontent.com/betsyrosalen/DATA_608_Knowledge_and_Visual_Analytics/tree/master/Final_Project/data/Activity.csv'
+ActivityURL <- 'https://raw.githubusercontent.com/betsyrosalen/DATA_608_Knowledge_and_Visual_Analytics/master/Final_Project/data/Activity.csv'
 Activity <- read.csv(ActivityURL)
-AlcoholDrugsURL <- 'https://raw.githubusercontent.com/betsyrosalen/DATA_608_Knowledge_and_Visual_Analytics/tree/master/Final_Project/data/AlcoholDrugs.csv'
+AlcoholDrugsURL <- 'https://raw.githubusercontent.com/betsyrosalen/DATA_608_Knowledge_and_Visual_Analytics/master/Final_Project/data/AlcoholDrugs.csv'
 AlcoholDrugs <- read.csv(AlcoholDrugsURL)
-ActivityURL <- 'https://raw.githubusercontent.com/betsyrosalen/DATA_608_Knowledge_and_Visual_Analytics/tree/master/Final_Project/data/Activity.csv'
-Activity <- read.csv(ActivityURL)
-ActivityURL <- 'https://raw.githubusercontent.com/betsyrosalen/DATA_608_Knowledge_and_Visual_Analytics/tree/master/Final_Project/data/Activity.csv'
-Activity <- read.csv(ActivityURL)
-ActivityURL <- 'https://raw.githubusercontent.com/betsyrosalen/DATA_608_Knowledge_and_Visual_Analytics/tree/master/Final_Project/data/Activity.csv'
-Activity <- read.csv(ActivityURL)
-ActivityURL <- 'https://raw.githubusercontent.com/betsyrosalen/DATA_608_Knowledge_and_Visual_Analytics/tree/master/Final_Project/data/Activity.csv'
-Activity <- read.csv(ActivityURL)
+DietURL <- 'https://raw.githubusercontent.com/betsyrosalen/DATA_608_Knowledge_and_Visual_Analytics/master/Final_Project/data/Diet.csv'
+Diet <- read.csv(DietURL)
+ObesityURL <- 'https://raw.githubusercontent.com/betsyrosalen/DATA_608_Knowledge_and_Visual_Analytics/master/Final_Project/data/Obesity.csv'
+Obesity <- read.csv(ObesityURL)
+SexURL <- 'https://raw.githubusercontent.com/betsyrosalen/DATA_608_Knowledge_and_Visual_Analytics/master/Final_Project/data/Sex.csv'
+Sex <- read.csv(SexURL)
+TobaccoURL <- 'https://raw.githubusercontent.com/betsyrosalen/DATA_608_Knowledge_and_Visual_Analytics/master/Final_Project/data/Tobacco.csv'
+Tobacco <- read.csv(TobaccoURL)
 
-URL <- 'https://raw.githubusercontent.com/betsyrosalen/DATA_608_Knowledge_and_Visual_Analytics/tree/master/Final_Project/data/'
-
-files <- c('Activity', 'AlcoholDrugs', 'Diet', 'Obesity', 'Sex', 'Tobacco')
-
-for (file in files) {
-    file <- read.csv(paste(URL, file, ".csv", sep=""))
-}
+# URL <- 'https://raw.githubusercontent.com/betsyrosalen/DATA_608_Knowledge_and_Visual_Analytics/master/Final_Project/data/'
+# 
+# files <- c('Activity', 'AlcoholDrugs', 'Diet', 'Obesity', 'Sex', 'Tobacco')
+# 
+# for (file in files) {
+#     file <- read.csv(paste(URL, file, ".csv", sep=""))
+# }
+# 
+# lapply(files, function(file) {
+#     file <- read.csv(paste(URL, file, ".csv", sep=""))
+# })
 
 ui <- fluidPage(
     headerPanel('State Mortality Rates Explorer'),
