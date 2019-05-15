@@ -36,8 +36,8 @@ library(shiny)
 library(shinythemes)
 library(ggplot2)
 library(stringr)
-library(dplyr)
 library(plyr)
+library(dplyr)
 library(readr)
 library(DT)
 #library(tools)
@@ -61,39 +61,42 @@ Tobacco <- read.csv(TobaccoURL, stringsAsFactors = FALSE)
 
 ##### DATA CLEANING AND PREP >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+# Combine all data into one data frame
 df <- rbind(Activity, AlcoholDrugs, Diet, Obesity, Sex, Tobacco)
 
-year <- df[, c("YEAR")] %>% unique()
-location <- df[, c("LocationDesc","StratificationType")] %>% distinct()
-gender <- df[, c("Sex")] %>% unique()
-race <- df[, c("Race")] %>% unique()
-topics <- df[, c("Topic","Subtopic")] %>% distinct()
+# Rename 'Total' to 'All' in Sex and Race fields
+df[df$Sex=="Total", "Sex"] <- "All"
+df[df$Race=="Total", "Race"] <- "All"
+
+# Replace N/A's in Greater_Risk_Question field
+df[df[, 'ShortQuestionText']=='Fruit consumption >= 1 time', 'Greater_Risk_Question']='Ate fruit 1 or less times per day'
+df[df[, 'ShortQuestionText']=='Fruit consumption >= 2 times', 'Greater_Risk_Question']='Ate fruit 2 or less times per day'
+df[df[, 'ShortQuestionText']=='Fruit consumption >= 3 times', 'Greater_Risk_Question']='Ate fruit 3 or less times per day'
+df[df[, 'ShortQuestionText']=='Milk drinking >= 1 glass', 'Greater_Risk_Question']='Drank milk 1 or less times per day'
+df[df[, 'ShortQuestionText']=='Milk drinking >= 2 glasses', 'Greater_Risk_Question']='Drank milk 2 or less times per day'
+df[df[, 'ShortQuestionText']=='Milk drinking >= 3 glasses', 'Greater_Risk_Question']='Drank milk 3 or less times per day'
+df[df[, 'ShortQuestionText']=='Vegetable eating >=1 time', 'Greater_Risk_Question']='Ate vegetables 1 or less times per day'
+df[df[, 'ShortQuestionText']=='Vegetable eating >=2 times', 'Greater_Risk_Question']='Ate vegetables 2 or less times per day'
+df[df[, 'ShortQuestionText']=='Vegetable eating >=3 times', 'Greater_Risk_Question']='Ate vegetables 3 or less times per day'
+df[df[, 'ShortQuestionText']=='Water drinking >= 1 glass', 'Greater_Risk_Question']='Drank 1 or less glasses of water per day'
+df[df[, 'ShortQuestionText']=='Water drinking >= 2 glasses', 'Greater_Risk_Question']='Drank 2 or less glasses of water per day'
+df[df[, 'ShortQuestionText']=='Water drinking >= 3 glasses', 'Greater_Risk_Question']='Drank 3 or less glasses of water per day'
+
+# Get rid of NULL values in Description field
+df[df[, 'Description']=='NULL', 'Description']=''
+
+# Create Sorted Lists for dropdown menus
+year <- df[, c("YEAR")] %>% unique() %>% sort()
+location <- df[, c("LocationDesc","StratificationType")] %>% distinct() %>% arrange(StratificationType, LocationDesc)
+gender <- df[, c("Sex")] %>% unique() %>% sort()
+race <- df[, c("Race")] %>% unique() %>% sort()
+topics <- df[, c("Topic","Subtopic")] %>% distinct() %>% arrange(Topic,Subtopic)
 questions <- df[, c("Topic","Subtopic","ShortQuestionText","Greater_Risk_Question",
-                    "Description")] %>% distinct()
-
-gender[gender=="Total"] <- "All"
-race[race=="Total"] <- "All"
-
-questions[questions[, 'ShortQuestionText']=='Fruit consumption >= 1 time', 'Greater_Risk_Question']='Ate fruit 1 or less times per day'
-questions[questions[, 'ShortQuestionText']=='Fruit consumption >= 2 times', 'Greater_Risk_Question']='Ate fruit 2 or less times per day'
-questions[questions[, 'ShortQuestionText']=='Fruit consumption >= 3 times', 'Greater_Risk_Question']='Ate fruit 3 or less times per day'
-questions[questions[, 'ShortQuestionText']=='Milk drinking >= 1 glass', 'Greater_Risk_Question']='Drank milk 1 or less times per day'
-questions[questions[, 'ShortQuestionText']=='Milk drinking >= 2 glasses', 'Greater_Risk_Question']='Drank milk 2 or less times per day'
-questions[questions[, 'ShortQuestionText']=='Milk drinking >= 3 glasses', 'Greater_Risk_Question']='Drank milk 3 or less times per day'
-questions[questions[, 'ShortQuestionText']=='Vegetable eating >=1 time', 'Greater_Risk_Question']='Ate vegetables 1 or less times per day'
-questions[questions[, 'ShortQuestionText']=='Vegetable eating >=2 times', 'Greater_Risk_Question']='Ate vegetables 2 or less times per day'
-questions[questions[, 'ShortQuestionText']=='Vegetable eating >=3 times', 'Greater_Risk_Question']='Ate vegetables 3 or less times per day'
-questions[questions[, 'ShortQuestionText']=='Water drinking >= 1 glass', 'Greater_Risk_Question']='Drank 1 or less glasses of water per day'
-questions[questions[, 'ShortQuestionText']=='Water drinking >= 2 glasses', 'Greater_Risk_Question']='Drank 2 or less glasses of water per day'
-questions[questions[, 'ShortQuestionText']=='Water drinking >= 3 glasses', 'Greater_Risk_Question']='Drank 3 or less glasses of water per day'
-
-questions[questions[, 'Description']=='NULL', 'Description']=''
-
-
+                    "Description")] %>% distinct() %>% arrange(Topic,Subtopic,Greater_Risk_Question)
 
 ##### USER INTERFACE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-ui <- fluidPage(
+ui <- fluidPage(theme = shinytheme("spacelab"),
     titlePanel('Youth Risk Behavior Study'),
     sidebarPanel(
         selectInput('risk', 'Risky Behavior', questions$Greater_Risk_Question,
@@ -101,10 +104,8 @@ ui <- fluidPage(
         #selectInput('LocationDesc', 'LocationDesc', unique(df$LocationDesc), selected='NY', multiple = TRUE)
         selectizeInput('location', 'Select up to 5 locations to compare with the national average',
                        location$LocationDesc, selected='New York', options = list(maxItems = 5)),
-        selectInput('gender', 'Gender', gender,
-                    selected='All'),
-        selectInput('race', 'Race', race,
-                    selected='All')
+        selectInput('gender', 'Gender', gender, selected='Total'),
+        selectInput('race', 'Race', race, selected='Total')
     ),
     mainPanel(
         h4(htmlOutput('selection')),
