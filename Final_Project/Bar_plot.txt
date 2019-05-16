@@ -1,0 +1,10 @@
+> ggplot(test, aes(x=LocationDesc,
++                  y=Greater_Risk_Data_Value,
++                  fill=factor(LocationDesc %in% c('United States', 'New York')))) +
++     geom_bar(stat="identity", show.legend=FALSE) +
++     scale_fill_manual(name = "area", values=c("red","grey50")) +
++     coord_flip() +
++     #geom_text(aes(label=..identity..)size=3, hjust=-0.2, color="darkgray") +
++     xlab("Location") +
++     ylab("Percent reported behavior") +
++     theme_minimal()
