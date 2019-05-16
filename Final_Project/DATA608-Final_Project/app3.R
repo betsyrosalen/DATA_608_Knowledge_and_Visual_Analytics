@@ -206,7 +206,7 @@ server <- function(input, output) {
     })
     
     DATA1b <- reactive({
-        df() %>%
+        df %>%
             filter(Greater_Risk_Question==input$risk & 
                        YEAR==2017 &
                        Sex==input$gender & Race==input$race) %>%
