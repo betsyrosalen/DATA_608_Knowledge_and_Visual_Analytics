@@ -190,7 +190,7 @@ ui <- fluidPage(
                     tags$li('Tobacco Use.csv')
                 ),
                 p("Each file contains data at the National, State, Territory, Local, and 'Other' regional levels for the years 1991 through 2017 (odd years only) in one file.  Each question is separated into a higher risk and lower risk category with the aggregated percentage of respondents in each cateogory in separate columns.  Variables for race, gender, and geolocation are also included."),
-                p('Data was downloaded from Kaggle and processed first to reduce the number of columns and remove rows without and risk values.'),
+                p('Data was downloaded from Kaggle and processed first to reduce the number of columns and remove rows without risk values.'),
                 h4('The R code for preprocessing can be found here:'),
                 a('https://github.com/betsyrosalen/DATA_608_Knowledge_and_Visual_Analytics/tree/master/Final_Project/DATA608_Final_Project_Data_Processing.Rmd', href='https://github.com/betsyrosalen/DATA_608_Knowledge_and_Visual_Analytics/tree/master/Final_Project/DATA608_Final_Project_Data_Processing.Rmd'),
                 h4('Pre-processed csv files can be found here:'),
