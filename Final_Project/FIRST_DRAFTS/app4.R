@@ -41,6 +41,8 @@ library(plyr)
 library(dplyr)
 library(readr)
 library(DT)
+#library(tools)
+
 
 ##### LOAD DATA >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -96,7 +98,8 @@ race <- df[, c("Race")] %>% unique() %>% sort()
 topics <- df[, c("Topic","Subtopic")] %>% distinct() %>% arrange(Topic,Subtopic)
 questions <- df[, c("Topic","Subtopic","ShortQuestionText","Greater_Risk_Question",
                     "Description")] %>% distinct() %>% arrange(Topic,Subtopic,Greater_Risk_Question)
-#
+
+
 # # NOT NEEDED unless I can figure out how to color code the x-axis labels for plot2b
 # palette <- factor(c("#1A0725", "#2A1505", "#0A1229", "#001808", "#20050F", "#191919"))
 # names(palette) <- levels(factor(topics$Topic))
@@ -122,8 +125,8 @@ ui <- fluidPage(
                                'Select up to 5 locations to compare with the national average',
                                location$LocationDesc, selected='New York',
                                options = list(maxItems = 5)),
-                selectInput('gender', 'Gender', gender, selected='All'),
-                selectInput('race', 'Race', race, selected='All'),
+                selectInput('gender', 'Gender', gender, selected='Total'),
+                selectInput('race', 'Race', race, selected='Total'),
                 hr(),
                 br(),
                 br(),
@@ -149,7 +152,7 @@ ui <- fluidPage(
                         h3('Line Plot Data'),
                         tableOutput('table1a')
                     ),
-                    tabPanel('Bar Plot Data',
+                    tabPanel('Bar Plot Data', 
                         br(),
                         h3('Bar Plot Data'),
                         tableOutput('table1b')
@@ -170,8 +173,8 @@ ui <- fluidPage(
                                 questions$Greater_Risk_Question,
                                 selected='Ever used marijuana',
                                 options = list(maxItems = 5)),
-                selectInput('gender2', 'Gender', gender, selected='All'),
-                selectInput('race2', 'Race', race, selected='All'),
+                selectInput('gender2', 'Gender', gender, selected='Total'),
+                selectInput('race2', 'Race', race, selected='Total'),
                 hr(),
                 br(),
                 br(),
@@ -196,41 +199,10 @@ ui <- fluidPage(
                         h3('Line Plot Data'),
                         tableOutput('table2a')
                     ),
-                    tabPanel('Bar Plot Data',
+                    tabPanel('Bar Plot Data',   
                         br(),
                         h3('Bar Plot Data'),
                         tableOutput('table2b')
-                    )
-                )
-            )
-        ),
-
-# <<<<<<<<<<<<<<<<<<<<<<<  Map  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-        tabPanel("Map",
-            sidebarPanel(
-                h3('Map Options'),
-                selectInput('risk3', 'Risky Behavior', questions$Greater_Risk_Question,
-                            selected='Ever used marijuana'),
-                selectInput('gender3', 'Gender', gender, selected='All'),
-                selectInput('race3', 'Race', race, selected='All'),
-                selectInput('year3', 'Year', year, selected='2005'),
-                hr(),
-                br()
-            ),
-            mainPanel(
-                tabsetPanel(
-                    tabPanel('Plots',
-                        br(),
-                        h4(htmlOutput('selection3')),
-                        h5(htmlOutput('description3')),
-                        plotOutput('map'),
-                        h6(strong('Note:'), 'Not all questions were asked in all locations in all years.  Missing plot points indicate data that was not collected.')
-                    ),
-                    tabPanel('Map Data',
-                        br(),
-                        h3('Map Data'),
-                        tableOutput('table3')
                     )
                 )
             )
@@ -267,10 +239,11 @@ ui <- fluidPage(
     )
 )
 
+
 ##### SERVER >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 server <- function(input, output) {
-
+    
 # <<<<<<<<<<<<<<<<<<<<<<<  Reactive Data Prep  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     national <- reactive({
@@ -278,8 +251,7 @@ server <- function(input, output) {
         filter(Greater_Risk_Question==input$risk &
                    StratificationType=="National" &
                    Sex==input$gender & Race==input$race) %>%
-        select(YEAR, LocationDesc, Greater_Risk_Question,
-               Greater_Risk_Data_Value, Sex, Race) %>%
+        select(YEAR, LocationDesc, Greater_Risk_Question, Greater_Risk_Data_Value) %>%
         arrange(YEAR, LocationDesc, Greater_Risk_Question)
     })
 
@@ -288,8 +260,7 @@ server <- function(input, output) {
         filter(Greater_Risk_Question==input$risk &
                    LocationDesc %in% input$location &
                    Sex==input$gender & Race==input$race) %>%
-        select(YEAR, LocationDesc, Greater_Risk_Question,
-               Greater_Risk_Data_Value, Sex, Race) %>%
+        select(YEAR, LocationDesc, Greater_Risk_Question, Greater_Risk_Data_Value) %>%
         arrange(YEAR, LocationDesc, Greater_Risk_Question)
     })
 
@@ -302,39 +273,26 @@ server <- function(input, output) {
             filter(Greater_Risk_Question==input$risk &
                        YEAR==input$year1 &
                        Sex==input$gender & Race==input$race) %>%
-            select(YEAR, LocationDesc, Greater_Risk_Question,
-                   Greater_Risk_Data_Value, Sex, Race) %>%
+            select(YEAR, LocationDesc, Greater_Risk_Question, Greater_Risk_Data_Value) %>%
             arrange(YEAR, LocationDesc, Greater_Risk_Question)
     })
 
     DATA2a <- reactive({
         df %>%
             filter(Greater_Risk_Question %in% input$risk2 &
-                   LocationDesc==input$location2 &
-                   Sex==input$gender2 & Race==input$race2) %>%
-            select(YEAR, LocationDesc, Greater_Risk_Question,
-                   Greater_Risk_Data_Value, Sex, Race) %>%
+                       LocationDesc==input$location2 &
+                       Sex==input$gender2 & Race==input$race2) %>%
+            select(YEAR, LocationDesc, Greater_Risk_Question, Greater_Risk_Data_Value) %>%
             arrange(YEAR, LocationDesc, Greater_Risk_Question)
     })
 
     DATA2b <- reactive({
         df %>%
             filter(LocationDesc==input$location2 &
-                   YEAR==input$year2 &
-                   Sex==input$gender2 & Race==input$race2) %>%
-            select(YEAR, LocationDesc, Greater_Risk_Question,
-                   Greater_Risk_Data_Value, Sex, Race) %>%
+                       YEAR==input$year2 &
+                       Sex==input$gender2 & Race==input$race2) %>%
+            select(YEAR, LocationDesc, Greater_Risk_Question, Greater_Risk_Data_Value) %>%
             arrange(YEAR, LocationDesc, Greater_Risk_Question)
-    })
-
-    DATA3 <- reactive({
-        df %>%
-            filter(Greater_Risk_Question %in% input$risk3 &
-                   YEAR==input$year3 & StratificationType=="State" &
-                   Sex==input$gender3 & Race==input$race3) %>%
-            select(YEAR, LocationDesc, Greater_Risk_Question,
-                   Greater_Risk_Data_Value, Sex, Race) %>%
-            arrange(LocationDesc)
     })
 
 # <<<<<<<<<<<<<<<<<<<<<<<  Compare Locations  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -384,21 +342,21 @@ server <- function(input, output) {
             theme(axis.text=element_text(size=12),
                   axis.title=element_text(size=14,face="bold"))
     })
-
+    
     output$table1a <- renderTable({
         DATA1a()},
-        striped = TRUE, spacing = "l", align = "lllccc", digits = 2, width = "100%",
+        striped = TRUE, spacing = "l", align = "lllc", digits = 2, width = "100%",
         caption = ""
     )
-
+    
     output$table1b <- renderTable({
         DATA1b()},
-        striped = TRUE, spacing = "l", align = "lllccc", digits = 2, width = "100%",
+        striped = TRUE, spacing = "l", align = "lllc", digits = 2, width = "100%",
         caption = ""
     )
-
+    
 # <<<<<<<<<<<<<<<<<<<<<<<<<  Compare Risks  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
+    
     output$selection2 <- renderText({
         paste('<strong>Comparative risks for ',
               if(input$gender2 != "All"){tolower(input$gender2)},
@@ -441,57 +399,19 @@ server <- function(input, output) {
                   axis.title=element_text(size=14,face="bold"),
                   axis.text.x=element_text(angle = 90, hjust = 1))
     })
-
+    
     output$table2a <- renderTable({
         DATA2a()},
-        striped = TRUE, spacing = "l", align = "lllccc", digits = 2, width = "100%",
+        striped = TRUE, spacing = "l", align = "lllc", digits = 2, width = "100%",
         caption = ""
     )
-
+    
     output$table2b <- renderTable({
         DATA2b()},
-        striped = TRUE, spacing = "l", align = "lllccc", digits = 2, width = "100%",
+        striped = TRUE, spacing = "l", align = "lllc", digits = 2, width = "100%",
         caption = ""
     )
-
-# <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<  Map  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-    output$selection3 <- renderText({
-        paste('<strong>Percent of', if(input$gender3 != "All"){tolower(input$gender3)},
-              if(input$race3 != "All"){input$race3},
-              'high schoolers who reported in', input$year3, 'that they... </strong>', input$risk)
-    })
-
-    output$description3 <- renderText({
-        paste('<br> (', questions[questions[, 'Greater_Risk_Question']==input$risk3,
-                                  'Description'], ')')
-    })
-
-    output$map <- renderPlot({
-        us <- map_data("state")
-        us$region <- str_to_title(us$region)
-        ggplot() +
-            geom_map(data=us, map=us,
-                                aes(x=long, y=lat, map_id=region),
-                                fill="#ffffff", color="black", size=0.15) +
-            geom_map(data=DATA3(), map=us,
-                                aes(fill=Greater_Risk_Data_Value, map_id=LocationDesc),
-                                color="black", size=0.15) +
-            scale_fill_continuous(low='#FED766', high="#004187",
-                                             guide='colorbar') +
-            labs(x=NULL, y=NULL) +
-            coord_map("albers", lat0 = 39, lat1 = 45) +
-            theme(panel.border = element_blank()) +
-            theme(panel.background = element_blank()) +
-            theme(axis.ticks = element_blank()) +
-            theme(axis.text = element_blank())
-    })
-
-    output$table3 <- renderTable({
-        DATA3()},
-        striped = TRUE, spacing = "l", align = "lllccc", digits = 2, width = "100%",
-        caption = ""
-    )
+    
 }
 
 shinyApp(ui = ui, server = server)
