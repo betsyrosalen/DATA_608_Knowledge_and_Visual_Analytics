@@ -41,6 +41,7 @@ library(plyr)
 library(dplyr)
 library(readr)
 library(DT)
+#library(maps)
 
 ##### LOAD DATA >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -96,6 +97,13 @@ race <- df[, c("Race")] %>% unique() %>% sort()
 topics <- df[, c("Topic","Subtopic")] %>% distinct() %>% arrange(Topic,Subtopic)
 questions <- df[, c("Topic","Subtopic","ShortQuestionText","Greater_Risk_Question",
                     "Description")] %>% distinct() %>% arrange(Topic,Subtopic,Greater_Risk_Question)
+
+# Get map data
+# us <- map_data("state")
+# us$region <- str_to_title(us$region)
+usURL <- 'https://raw.githubusercontent.com/betsyrosalen/DATA_608_Knowledge_and_Visual_Analytics/master/Final_Project/data/us_map_data.csv'
+us <- read.csv(usURL, stringsAsFactors = FALSE)
+
 #
 # # NOT NEEDED unless I can figure out how to color code the x-axis labels for plot2b
 # palette <- factor(c("#1A0725", "#2A1505", "#0A1229", "#001808", "#20050F", "#191919"))
@@ -220,7 +228,7 @@ ui <- fluidPage(
             ),
             mainPanel(
                 tabsetPanel(
-                    tabPanel('Plots',
+                    tabPanel('Map',
                         br(),
                         h4(htmlOutput('selection3')),
                         h5(htmlOutput('description3')),
@@ -468,8 +476,6 @@ server <- function(input, output) {
     })
 
     output$map <- renderPlot({
-        us <- map_data("state")
-        us$region <- str_to_title(us$region)
         ggplot() +
             geom_map(data=us, map=us,
                                 aes(x=long, y=lat, map_id=region),
